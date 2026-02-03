@@ -42,5 +42,16 @@ def _load_short():
 def short():
     return jsonify(_load_short())
 
+@app.route("/text", methods=["GET"])
+def text():
+    list = _load_short()
+    rv=[]
+    for item in list:
+        if item['name'] is None:
+            continue
+        rv.append(item['name'] + " is " + item['hubspot_id'])
+    return "\n".join(rv)
+
+
 app.run(debug=True)
 
