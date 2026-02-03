@@ -10,6 +10,13 @@ from supa import get_contacts_from_supabase
 
 app = Flask(__name__)
 
+
+@app.after_request
+def cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+    return response
+
+
 def _load_full():
     base = os.path.dirname(os.path.abspath(__file__))
     with open(os.path.join(base, "tammer.json")) as f:
