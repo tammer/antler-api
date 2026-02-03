@@ -5,6 +5,8 @@ from flask import Flask, request, jsonify
 
 from deduplicate_contacts import deduplicate_contacts
 
+from hubspot import get_contacts_for_owner
+
 app = Flask(__name__)
 
 def _load_full():
@@ -13,7 +15,8 @@ def _load_full():
         tammer = json.load(f)
     with open(os.path.join(base, "alexa.json")) as f:
         alexa = json.load(f)
-    return deduplicate_contacts(tammer + alexa)
+    fresh = get_contacts_for_owner("29286558", "2026-02-01T00:00:00.000Z")
+    return deduplicate_contacts(fresh + tammer + alexa)
 
 @app.route("/", methods=["GET"])
 def hello():
