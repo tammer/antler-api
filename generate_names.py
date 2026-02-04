@@ -3,6 +3,7 @@ import os
 
 from meetgeek import get_transcript
 from groq import get_groq_response
+from contact_loader import load_short
 
 
 CACHE_FILE = "names_cache.json"
@@ -58,4 +59,16 @@ def generate_names(transcript_id: str) -> str:
     cache[transcript_id] = response
     _save_cache(cache)
 
+    return response
+
+
+def generate_ids(transcript_id: str) -> list[str]:
+    names = generate_names(transcript_id)
+    system_prompt = f"Consider this list: {names}. You will map each name to a hubspot id based on the information you are provided that assocates names with hubspot ids. If there is no exact mathc, choose the closest match. You will output a json list of FULL NAMES from the mapping date and their hubspot ids. output pure json, no markdown or other text."
+    response = get_groq_response(
+        system_prompt=system_prompt,
+        user_prompt=json.dumps(load_short()),
+    )
+    response = json.loads(response)
+    response = [entry for entry in response if entry['hubspot_id'] is not None]
     return response
