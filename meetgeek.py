@@ -3,6 +3,7 @@ Fetch meeting transcript from MeetGeek API.
 """
 import json
 import os
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -104,12 +105,19 @@ def get_transcript(meeting_id: str) -> dict:
             },
             method="GET",
         )
-        try:
-            with urllib.request.urlopen(req) as resp:
-                data = json.loads(resp.read().decode())
-        except urllib.error.HTTPError as e:
-            body = e.read().decode() if e.fp else ""
-            raise RuntimeError(f"MeetGeek API error {e.code}: {body}") from e
+        for attempt in range(3):
+            try:
+                with urllib.request.urlopen(req) as resp:
+                    data = json.loads(resp.read().decode())
+                break
+            except urllib.error.HTTPError as e:
+                body = e.read().decode() if e.fp else ""
+                raise RuntimeError(f"MeetGeek API error {e.code}: {body}") from e
+            except (urllib.error.URLError, TimeoutError) as e:
+                if attempt < 2:
+                    time.sleep(5)
+                else:
+                    raise RuntimeError(f"MeetGeek API request failed after 3 attempts: {e}") from e
 
         all_sentences.extend(data.get("sentences", []))
 
