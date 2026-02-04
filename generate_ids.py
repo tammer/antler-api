@@ -45,29 +45,22 @@ def generate_names(transcript_id: str) -> str:
         return cache[transcript_id]
 
     transcript = get_transcript(transcript_id)
-    # system_prompt = (
-    #     "You will be given a transcript of a meeting. You will need to extract "
-    #     "the full names of the people who were on the call. Only mention the people "
-    #     "who were present. output as a json list of names. output pure json, no markdown or other text."
-    # )
-    # system_prompt = """ You will be given a transcript of a meeting. You will need to extract the full names of the people who were on the call. If the transcript has dialog labeled with speaker names, then you will use those lables to determine the names of the people who were on the call. if the dialog is labled with generic labels such has 'Speaker_01" then read the dialog so see if anyone explicitly sates who is present. do not infer who was present from the dialog. if you can't infer any names then output an empty list. output as a json list of names. output pure json, no markdown or other text.
-    # """
+    attendees = transcript["attendees"]
+    # if list is not empty then return the list
+    if attendees:
+        return attendees
+    
     system_prompt = """
     You are an information extraction system.
 
-You will be given a transcript of a meeting.
-Your task is to extract the full names of people who were present in the meeting.
+    You will be given a transcript of a meeting. Read the beginning  and the end of the transcript to see if someone explicitly states who is present. If someone explicitly states who is present, then include that name in the output. If no one explicitly states who is present, then output an empty list. Do not infer who was present from the dialog
 
-Rules:
-- If speaker labels contain full human names, include those names. Make sure to include all of the named speakers.
-- If speaker labels are generic (e.g. "Speaker_01", "Speaker 2"), then read the dialog to see if someone explicitly states who is present. If someone explicitly states who is present, then include that name in the output. If no one explicitly states who is present, then output an empty list.
-
-Output format:
-- Return a JSON array of strings.
-- Output pure JSON only. Do not include markdown, comments, or extra text.
+    Output format:
+        - Return a JSON array of strings.
+        - Output pure JSON only. Do not include markdown, comments, or extra text.
 
     """
-    user_prompt = transcript
+    user_prompt = transcript["transcript"]
     response = get_groq_response(
         system_prompt=system_prompt,
         user_prompt=user_prompt,
@@ -75,7 +68,7 @@ Output format:
 
     # Store in cache indexed on meeting/transcript id.
     cache[transcript_id] = response
-    # _save_cache(cache, NAMES_CACHE_FILE)
+    _save_cache(cache, NAMES_CACHE_FILE)
 
     return response
 

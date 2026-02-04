@@ -28,15 +28,17 @@ def process_transcript(sentences: list[dict]) -> dict:
 
     Return value example:
       {
-        "transcript": "Speaker A: Hello\\nSpeaker B: Hi there"
+        "transcript": "Speaker A: Hello\\nSpeaker B: Hi there",
+        "attendees": ["Speaker A", "Speaker B"]
       }
     """
     if not sentences:
-        return {"transcript": ""}
+        return {"transcript": "", "attendees": []}
 
     lines = []
     current_speaker = None
     current_chunks = []
+    attendees_seen: list[str] = []  # unique speakers in order of first appearance
 
     for item in sentences:
         speaker = item.get("speaker") or "Unknown speaker"
@@ -45,6 +47,9 @@ def process_transcript(sentences: list[dict]) -> dict:
         # Skip completely empty texts
         if not text:
             continue
+
+        if speaker not in attendees_seen:
+            attendees_seen.append(speaker)
 
         # If this is the same speaker as the previous one, just accumulate text
         if speaker == current_speaker:
@@ -64,15 +69,20 @@ def process_transcript(sentences: list[dict]) -> dict:
         joined = " ".join(current_chunks)
         lines.append(f"{current_speaker}: {joined}")
 
+    # remove "Unknown speaker" from attendees
+    attendees_seen = [attendee for attendee in attendees_seen if attendee != "Unknown speaker"]
+    attendees_seen = [attendee for attendee in attendees_seen if not attendee.startswith("Speaker_")]
     human_readable = "\n".join(lines)
-    return {"transcript": human_readable}
+    return {"transcript": human_readable, "attendees": attendees_seen}
 
 
-def get_transcript(meeting_id: str) -> str:
+def get_transcript(meeting_id: str) -> dict:
     """Fetch the full transcript for a meeting by ID.
 
     Uses Bearer token from MEETGEEK_API_KEY. Handles pagination and returns
-    a human-readable transcript (speaker-labeled, same-speaker lines merged).
+    a dict with:
+      transcript: human-readable transcript (speaker-labeled, same-speaker lines merged)
+      attendees: list of speaker names in order of first appearance
     """
     api_key = (MEETGEEK_API_KEY or "").strip().strip('"').strip("'")
     if not api_key:
@@ -108,7 +118,7 @@ def get_transcript(meeting_id: str) -> str:
         if not cursor:
             break
 
-    return process_transcript(all_sentences)["transcript"]
+    return process_transcript(all_sentences)
 
 def get_all_meetings(token: str | None = None) -> list[dict]:
     """
