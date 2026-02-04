@@ -109,3 +109,53 @@ def get_transcript(meeting_id: str) -> str:
             break
 
     return process_transcript(all_sentences)["transcript"]
+
+def get_all_meetings(token: str | None = None) -> list[dict]:
+    """
+    Fetch all meetings from MeetGeek API with pagination.
+    Returns a list of dicts with meeting_id, timestamp_start_utc, timestamp_end_utc.
+
+    Pass the Bearer token as `token`, or set MEETGEEK_API_TOKEN env var.
+    """
+    api_token = (token or os.environ.get("MEETGEEK_API_KEY") or "").strip()
+    if not api_token:
+        raise ValueError("Provide token or set MEETGEEK_API_TOKEN")
+
+    # EU base URL (use api.meetgeek.ai or api-us.meetgeek.ai if needed)
+    base_url = "https://api.meetgeek.ai/v1/teams/1843/meetings"
+    headers = {
+        "Authorization": f"Bearer {api_token}",
+        "Accept": "application/json",
+        "User-Agent": "curl/8.0",  # API often blocks Python's default User-Agent
+    }
+
+    all_meetings: list[dict] = []
+    cursor: str | None = None
+    limit = 500  # max per request
+
+    while True:
+        params = {"limit": limit}
+        if cursor:
+            params["cursor"] = cursor
+        url = f"{base_url}?{urllib.parse.urlencode(params)}"
+
+        req = urllib.request.Request(url, headers=headers, method="GET")
+        try:
+            with urllib.request.urlopen(req) as resp:
+                data = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as e:
+            body = e.read().decode()
+            raise RuntimeError(f"MeetGeek API error {e.code}: {body}") from e
+        except urllib.error.URLError as e:
+            raise RuntimeError(f"Request failed: {e.reason}") from e
+
+        meetings = data.get("meetings") or []
+        all_meetings.extend(meetings)
+
+        pagination = data.get("pagination") or {}
+        next_cursor = pagination.get("next_cursor")
+        if not next_cursor or not meetings:
+            break
+        cursor = next_cursor
+
+    return all_meetings

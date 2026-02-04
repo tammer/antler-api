@@ -1,5 +1,11 @@
 from generate_ids import generate_ids
 import json
+from meetgeek import get_all_meetings
 
-response = generate_ids("649eb082-39a7-47a2-84ad-1959671920b9")
-print(json.dumps(response, indent=4))
+meetings = get_all_meetings()
+# print(json.dumps(meetings, indent=4))
+
+for meeting in meetings:
+    print(meeting['meeting_id'])
+    response = generate_ids(meeting['meeting_id'])
+    print(json.dumps(response, indent=4))
