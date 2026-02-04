@@ -1,5 +1,6 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
+from generate_ids import generate_ids
 from contact_loader import load_full, load_short
 
 app = Flask(__name__)
@@ -21,15 +22,11 @@ def short():
     return jsonify(load_short())
 
 
-@app.route("/text", methods=["GET"])
-def text():
-    list = load_short()
-    rv=[]
-    for item in list:
-        if item['name'] is None:
-            continue
-        rv.append(item['name'] + " is " + item['hubspot_id'])
-    return "\n".join(rv)
+@app.route("/ids", methods=["GET"])
+def ids():
+    # id is a parameter
+    meeting_id = request.args.get("meeting_id")
+    return generate_ids(meeting_id)
 
 
 app.run(debug=True)
