@@ -1,4 +1,4 @@
-from generate_names import generate_ids
+from generate_ids import generate_ids
 import json
 
 
