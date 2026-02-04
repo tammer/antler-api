@@ -6,25 +6,26 @@ from groq import get_groq_response
 from contact_loader import load_short
 
 
-CACHE_FILE = "names_cache.json"
+NAMES_CACHE_FILE = "names_cache.json"
+IDS_CACHE_FILE = "ids_cache.json"
 
 
-def _load_cache() -> dict:
-    """Load the names cache from disk."""
-    if not os.path.exists(CACHE_FILE):
+def _load_cache(path: str) -> dict:
+    """Load a JSON cache from disk."""
+    if not os.path.exists(path):
         return {}
     try:
-        with open(CACHE_FILE, "r", encoding="utf-8") as f:
+        with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except (json.JSONDecodeError, OSError):
         # If cache is corrupted or unreadable, ignore it.
         return {}
 
 
-def _save_cache(cache: dict) -> None:
-    """Persist the names cache to disk."""
+def _save_cache(cache: dict, path: str) -> None:
+    """Persist a JSON cache to disk."""
     try:
-        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+        with open(path, "w", encoding="utf-8") as f:
             json.dump(cache, f)
     except OSError:
         # Failing to write cache should not break main flow.
@@ -37,7 +38,7 @@ def generate_names(transcript_id: str) -> str:
 
     Uses a local JSON cache `names_cache.json` keyed by transcript/meeting id.
     """
-    cache = _load_cache()
+    cache = _load_cache(NAMES_CACHE_FILE)
 
     # Check cache before doing any transcript / LLM work.
     if transcript_id in cache:
@@ -57,18 +58,34 @@ def generate_names(transcript_id: str) -> str:
 
     # Store in cache indexed on meeting/transcript id.
     cache[transcript_id] = response
-    _save_cache(cache)
+    _save_cache(cache, NAMES_CACHE_FILE)
 
     return response
 
 
 def generate_ids(transcript_id: str) -> list[str]:
+    # First, check the local cache for existing IDs.
+    ids_cache = _load_cache(IDS_CACHE_FILE)
+    if transcript_id in ids_cache:
+        return ids_cache[transcript_id]
+
     names = generate_names(transcript_id)
-    system_prompt = f"Consider this list: {names}. You will map each name to a hubspot id based on the information you are provided that assocates names with hubspot ids. If there is no exact mathc, choose the closest match. You will output a json list of FULL NAMES from the mapping date and their hubspot ids. output pure json, no markdown or other text."
+    system_prompt = (
+        f"Consider this list: {names}. You will map each name to a hubspot id based on "
+        "the information you are provided that assocates names with hubspot ids. If "
+        "there is no exact mathc, choose the closest match. You will output a json "
+        "list of FULL NAMES from the mapping date and their hubspot ids. output pure "
+        "json, no markdown or other text."
+    )
     response = get_groq_response(
         system_prompt=system_prompt,
         user_prompt=json.dumps(load_short()),
     )
     response = json.loads(response)
-    response = [entry for entry in response if entry['hubspot_id'] is not None]
+    response = [entry for entry in response if entry["hubspot_id"] is not None]
+
+    # Store in cache indexed on meeting/transcript id.
+    ids_cache[transcript_id] = response
+    _save_cache(ids_cache, IDS_CACHE_FILE)
+
     return response
