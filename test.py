@@ -1,9 +1,11 @@
 from groq import get_groq_response
 import json
 from contact_loader import load_short
-from make_transcript import make_transcript
+from generate_names import generate_names
 
-response = make_transcript("649eb082-39a7-47a2-84ad-1959671920b9")
+response = generate_names("649eb082-39a7-47a2-84ad-1959671920b9")
+print(response)
+exit()
 
 # Part 2
 
