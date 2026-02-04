@@ -63,10 +63,20 @@ def generate_names(transcript_id: str) -> str:
     return response
 
 def similar_names(name1, name2):
-    """Return True if the two names share at least one word (case-insensitive)."""
-    words1 = set(name1.lower().split())
-    words2 = set(name2.lower().split())
-    return bool(words1 & words2)
+    """Return True if any word from name1 is similar to any word from name2 (word contained in word, case-insensitive)."""
+    words1 = [w for w in name1.strip().lower().split() if w]
+    words2 = [w for w in name2.strip().lower().split() if w]
+    if not words1 or not words2:
+        return False
+    # remove any word less than 2 characters
+    words1 = [w for w in words1 if len(w) > 2]
+    words2 = [w for w in words2 if len(w) > 2]
+    for w1 in words1:
+        for w2 in words2:
+            shorter, longer = (w1, w2) if len(w1) <= len(w2) else (w2, w1)
+            if shorter in longer:
+                return True
+    return False
 
 def filter_names(names,master_list):
     # iterate through masster_list
@@ -94,7 +104,7 @@ def generate_ids(transcript_id: str) -> list[str]:
     system_prompt = (
         f"Consider this list: {names}. You will map each name to a hubspot id based on "
         "the information you are provided that assocates names with hubspot ids. If "
-        "names might not match exactly in which case accept a close match. If there is no close match, output null for the hubspot_id. You will output a json "
+        "names might not match exactly in which case accept a close match.  If there is no reasonable match, output null for the hubspot_id. You will output a json "
         "list of FULL NAMES from the mapping data and their hubspot ids. there will be two keys: name and hubspot_id. output pure json, no markdown or other text."
     )
     response = get_groq_response(
