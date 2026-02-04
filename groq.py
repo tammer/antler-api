@@ -10,7 +10,6 @@ import urllib.request
 GROQ_API_KEY = (os.environ.get("GROQ_API_KEY") or "").strip().strip('"').strip("'")
 CHAT_URL = "https://api.groq.com/openai/v1/chat/completions"
 DEFAULT_MODEL = "openai/gpt-oss-120b"
-print(f"GROQ_API_KEY: {GROQ_API_KEY}")
 
 def get_groq_response(
     system_prompt: str,
@@ -30,8 +29,10 @@ def get_groq_response(
         headers={
             "Authorization": f"Bearer {GROQ_API_KEY}",
             "Content-Type": "application/json",
+            "User-Agent": "curl/7.68.0",
         },
     )
+
     try:
         with urllib.request.urlopen(req) as resp:
             data = json.loads(resp.read().decode())
