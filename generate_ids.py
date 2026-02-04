@@ -26,7 +26,7 @@ def _save_cache(cache: dict, path: str) -> None:
     """Persist a JSON cache to disk."""
     try:
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(cache, f)
+            json.dump(cache, f, indent=2, ensure_ascii=False)
     except OSError:
         # Failing to write cache should not break main flow.
         pass
@@ -70,6 +70,7 @@ def generate_ids(transcript_id: str) -> list[str]:
         return ids_cache[transcript_id]
 
     names = generate_names(transcript_id)
+    print(names)
     system_prompt = (
         f"Consider this list: {names}. You will map each name to a hubspot id based on "
         "the information you are provided that assocates names with hubspot ids. If "
