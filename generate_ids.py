@@ -73,9 +73,8 @@ def generate_ids(transcript_id: str) -> list[str]:
     system_prompt = (
         f"Consider this list: {names}. You will map each name to a hubspot id based on "
         "the information you are provided that assocates names with hubspot ids. If "
-        "there is no exact mathc, choose the closest match. You will output a json "
-        "list of FULL NAMES from the mapping date and their hubspot ids. output pure "
-        "json, no markdown or other text."
+        "there is no exact match, choose the closest match. You will output a json "
+        "list of FULL NAMES from the mapping data and their hubspot ids. there will be two keys: name and hubspot_id. output pure json, no markdown or other text."
     )
     response = get_groq_response(
         system_prompt=system_prompt,
