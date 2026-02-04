@@ -1,18 +1,9 @@
-from meetgeek import get_transcript
 from groq import get_groq_response
 import json
 from contact_loader import load_short
-transcript = get_transcript("649eb082-39a7-47a2-84ad-1959671920b9")
+from make_transcript import make_transcript
 
-system_prompt = "You will be given a transcript of a meeting. You will need to extract the names of the people who were on the call. Only mention the people who were present. output as json list of names."
-user_prompt = transcript
-
-response = get_groq_response(
-    system_prompt=system_prompt,
-    user_prompt=user_prompt,
-)
-
-print(response)
+response = make_transcript("649eb082-39a7-47a2-84ad-1959671920b9")
 
 # Part 2
 
