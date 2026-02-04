@@ -14,7 +14,6 @@ RPC_NAME = "get_unique_hubspot_attendees"
 def get_contacts_from_supabase() -> list[dict]:
     """Call Supabase RPC get_unique_hubspot_attendees and return the contact rows."""
     key = os.environ.get("SUPABASE_SECRET")
-    print(f"key: {key}")
     if not key:
         raise RuntimeError("SUPABASE_SECRET environment variable is not set")
 
