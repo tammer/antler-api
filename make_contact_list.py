@@ -9,7 +9,7 @@ OWNER_ID = "29286558" # Tammer
 
 date_limit = "2016-02-01T00:00:00.000Z"
 
-blacklist = ["Alex Wright","Daphne","Tammer"]
+blacklist = ["Alex Wright","Daphne","Tammer","Daphne McLarty"]
 
 def main():
     contacts = get_contacts_for_owner(OWNER_ID, date_limit)
