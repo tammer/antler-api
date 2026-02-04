@@ -65,6 +65,8 @@ def generate_names(transcript_id: str) -> str:
         system_prompt=system_prompt,
         user_prompt=user_prompt,
     )
+    response = response.replace("```json", "").replace("```", "")
+    response = json.loads(response)
 
     # Store in cache indexed on meeting/transcript id.
     cache[transcript_id] = response
@@ -104,15 +106,13 @@ def generate_ids(transcript_id: str) -> list[str]:
     if transcript_id in ids_cache:
         return ids_cache[transcript_id]
 
-    names = generate_names(transcript_id)
-    # remove leading ```json and trailing ```
-    names = names.replace("```json", "").replace("```", "")
-    names_ = json.loads(names)
+    names_ = generate_names(transcript_id)
+    names = json.dumps(names_)
     print(names_)
     full = load_full()
     filtered_full = filter_names(names_,full)
     system_prompt = (
-        f"Consider this list: {names}. You will map each name to a hubspot id based on "
+        f"Consider this list: {names}. You will map each name to one andn only on hubspot id based on "
         "the information you are provided that assocates names with hubspot ids. If "
         "names might not match exactly in which case accept a close match.  If there is no reasonable match, output null for the hubspot_id. You will output a json "
         "list of FULL NAMES from the mapping data and their hubspot ids. there will be two keys: name and hubspot_id. output pure json, no markdown or other text."
@@ -123,8 +123,6 @@ def generate_ids(transcript_id: str) -> list[str]:
     )
     response = json.loads(response)
     response = [entry for entry in response if entry["hubspot_id"] is not None]
-    print(response)
-    exit()
 
     # Store in cache indexed on meeting/transcript id.
     ids_cache[transcript_id] = response
