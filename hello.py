@@ -8,7 +8,7 @@ from meetgeek import get_all_meetings, get_transcript
 app = Flask(__name__)
 
 
-ALLOWED_ORIGINS = {"http://localhost:5173", "https://api.tammer.com"}
+ALLOWED_ORIGINS = {"http://localhost:5173", "https://api.tammer.com", "https://antler.tammer.com"}
 
 
 @app.after_request
