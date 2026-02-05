@@ -39,7 +39,8 @@ def ids():
 @app.route("/supa_from_id", methods=["GET"])
 def supa_from_id():
     meeting_id = request.args.get("meeting_id")
-    return supa_from_id_func(meeting_id)
+    supa_from_id_func(meeting_id)
+    return "", 200
 
 
 @app.route("/summary_from_id", methods=["GET"])
