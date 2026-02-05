@@ -8,9 +8,14 @@ from meetgeek import get_all_meetings, get_transcript
 app = Flask(__name__)
 
 
+ALLOWED_ORIGINS = {"http://localhost:5173", "https://api.tammer.com"}
+
+
 @app.after_request
 def cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "http://localhost:5173"
+    origin = request.headers.get("Origin")
+    if origin in ALLOWED_ORIGINS:
+        response.headers["Access-Control-Allow-Origin"] = origin
     return response
 
 
