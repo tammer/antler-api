@@ -3,7 +3,7 @@ from flask import Flask, jsonify, request
 from generate_ids import generate_ids
 from contact_loader import load_full, load_short
 from supa_from_id import supa_from_id as supa_from_id_func, summarize_transcript
-from meetgeek import get_all_meetings
+from meetgeek import get_all_meetings, get_transcript
 
 app = Flask(__name__)
 
@@ -68,6 +68,18 @@ def get_all_meetings_route():
         formatted.append({"meeting_id": meeting_id, "name": name})
 
     return jsonify(formatted)
+
+
+@app.route("/get_transcript", methods=["GET"])
+def get_transcript_route():
+    meeting_id = request.args.get("meeting_id")
+    if not meeting_id:
+        return jsonify({"error": "missing meeting_id"}), 400
+    try:
+        result = get_transcript(meeting_id)
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch transcript: {str(e)}"}), 500
+    return jsonify(result)
 
 @app.route("/supa_from_meetgeek", methods=["POST"])
 def supa_from_meetgeek():
