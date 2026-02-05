@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 
 from generate_ids import generate_ids
 from contact_loader import load_full, load_short
-from supa_from_id import supa_from_id as supa_from_id_func
+from supa_from_id import supa_from_id as supa_from_id_func, summarize_transcript
 
 app = Flask(__name__)
 
@@ -35,6 +35,18 @@ def supa_from_id():
     meeting_id = request.args.get("meeting_id")
     return supa_from_id_func(meeting_id)
 
+
+@app.route("/summary_from_id", methods=["GET"])
+def summary_from_id():
+    meeting_id = request.args.get("meeting_id")
+    if not meeting_id:
+        return jsonify({"error": "missing meeting_id"}), 400
+    try:
+        result = summarize_transcript(meeting_id)
+    except Exception as e:
+        return jsonify({"error": f"Failed to generate summary: {str(e)}"}), 500
+    return jsonify(result)
+
 @app.route("/supa_from_meetgeek", methods=["POST"])
 def supa_from_meetgeek():
     body = request.get_json(silent=True) or {}
@@ -48,6 +60,7 @@ def supa_from_meetgeek():
     if result is None:
         return jsonify({"message": "Meeting too short, skipped"}), 200
     return jsonify(result)
+
 
 
 app.run(debug=True)
