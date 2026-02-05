@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request
 
 from generate_ids import generate_ids
 from contact_loader import load_full, load_short
+from supa_from_id import supa_from_id as supa_from_id_func
 
 app = Flask(__name__)
 
@@ -28,6 +29,11 @@ def ids():
     meeting_id = request.args.get("meeting_id")
     return generate_ids(meeting_id)
 
+
+@app.route("/supa_from_id", methods=["GET"])
+def supa_from_id():
+    meeting_id = request.args.get("meeting_id")
+    return supa_from_id_func(meeting_id)
 
 app.run(debug=True)
 

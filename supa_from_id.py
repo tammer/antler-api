@@ -28,4 +28,4 @@ def supa_from_id(id):
         return
     summary = summarize_transcript(id)
     note_id = write_to_supa(summary["summary"], summary["ids"], stats["start_time"])
-    return note_id
+    return {"note_id": note_id, "summary": summary["summary"], "ids": summary["ids"], "stats": stats}
