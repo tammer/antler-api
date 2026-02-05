@@ -7,12 +7,48 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 
 
 MEETGEEK_API_KEY = os.environ.get("MEETGEEK_API_KEY")
 BASE_URL = "https://api.meetgeek.ai"
 PAGE_LIMIT = 500
 
+def get_duration(meeting_id: str) -> int:
+    """Get meeting duration in seconds using MeetGeek API (GET /v1/meetings/{meetingId})."""
+    api_key = (MEETGEEK_API_KEY or "").strip().strip('"').strip("'")
+    if not api_key:
+        raise ValueError("MEETGEEK_API_KEY environment variable is not set")
+
+    url = f"{BASE_URL}/v1/meetings/{meeting_id}"
+    req = urllib.request.Request(
+        url,
+        headers={
+            "Authorization": f"Bearer {api_key}",
+            "Accept": "application/json",
+            "User-Agent": "curl/8.0",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req) as resp:
+            data = json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode() if e.fp else ""
+        raise RuntimeError(f"MeetGeek API error {e.code}: {body}") from e
+
+    start_str = data.get("timestamp_start_utc")
+    end_str = data.get("timestamp_end_utc")
+    if not start_str or not end_str:
+        raise ValueError("Meeting response missing timestamp_start_utc or timestamp_end_utc")
+
+    start = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
+    end = datetime.fromisoformat(end_str.replace("Z", "+00:00"))
+    if start.tzinfo is None:
+        start = start.replace(tzinfo=timezone.utc)
+    if end.tzinfo is None:
+        end = end.replace(tzinfo=timezone.utc)
+    return int((end - start).total_seconds())
 
 def process_transcript(sentences: list[dict]) -> dict:
     """
