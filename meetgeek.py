@@ -14,8 +14,10 @@ MEETGEEK_API_KEY = os.environ.get("MEETGEEK_API_KEY")
 BASE_URL = "https://api.meetgeek.ai"
 PAGE_LIMIT = 500
 
-def get_duration(meeting_id: str) -> int:
-    """Get meeting duration in seconds using MeetGeek API (GET /v1/meetings/{meetingId})."""
+def get_stats(meeting_id: str) -> dict:
+    """Get meeting stats (duration and start_time) using MeetGeek API (GET /v1/meetings/{meetingId}).
+    Returns a dict with keys: duration (int, seconds), start_time (str, ISO timestamp).
+    """
     api_key = (MEETGEEK_API_KEY or "").strip().strip('"').strip("'")
     if not api_key:
         raise ValueError("MEETGEEK_API_KEY environment variable is not set")
@@ -48,7 +50,8 @@ def get_duration(meeting_id: str) -> int:
         start = start.replace(tzinfo=timezone.utc)
     if end.tzinfo is None:
         end = end.replace(tzinfo=timezone.utc)
-    return int((end - start).total_seconds())
+    duration = int((end - start).total_seconds())
+    return {"duration": duration, "start_time": start_str}
 
 def process_transcript(sentences: list[dict]) -> dict:
     """
