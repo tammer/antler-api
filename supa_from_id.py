@@ -15,7 +15,8 @@ def summarize_transcript(id):
     participants = ", ".join(names)
     user_prompt = f"Participants: {participants}\n\n{transcript['transcript']}"
     response = get_groq_response(system_prompt, user_prompt)
-    return {"summary": response, "ids": ids}
+    prepend = f"## Recording\nThis note was created from [this MeetGeek video](https://app2.meetgeek.ai/meeting/{id})\n\n"
+    return {"summary": prepend + response, "ids": ids}
 
 def write_to_supa(note_text: str, attendees: list[dict], created_at: str | None = None) -> int:
     """Write a note and its attendees to Supabase via create_note_with_attendees2. Returns the new note id."""

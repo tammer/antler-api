@@ -1,5 +1,13 @@
-# supa_from_id
-
+from meetgeek import get_all_meetings
 from supa_from_id import supa_from_id
 
-print(supa_from_id("577074b2-a17e-4817-b9e8-bea0a82ade47"))
+
+
+meetings = get_all_meetings()
+for meeting in meetings:
+    print(meeting["meeting_id"])
+    try:
+        y = supa_from_id(meeting["meeting_id"])
+        print(y['ids'], flush=True)
+    except Exception as e:
+        print(f"Error processing meeting {meeting['meeting_id']}: {e}", flush=True)
