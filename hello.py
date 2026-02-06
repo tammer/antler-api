@@ -39,7 +39,10 @@ def ids():
 @app.route("/supa_from_id", methods=["GET"])
 def supa_from_id():
     meeting_id = request.args.get("meeting_id")
-    supa_from_id_func(meeting_id)
+    verbose = request.args.get("verbose")
+    result = supa_from_id_func(meeting_id)
+    if verbose:
+        return result
     return "", 200
 
 

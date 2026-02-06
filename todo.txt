@@ -1,4 +1,8 @@
-hook is wring three times.  need to return 200 i guess
+need the created_at, updated_at and meeting_at
 
-need the created_at, updated_at and meeting_dt
+db backup
+
+fancy url shit on app /by-attendee/87234827
+
+
 

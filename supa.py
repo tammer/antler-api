@@ -40,13 +40,13 @@ def get_contacts_from_supabase() -> list[dict]:
         raise RuntimeError(f"Request failed: {e.reason}") from e
 
 
-def create_note_with_attendees2(
+def create_note_with_attendees(
     note_text: str,
     attendees: list[dict],
-    created_at: str | None = None,
+    meeting_at: str | None = None,
 ) -> int:
     """
-    Call Supabase RPC create_note_with_attendees2.
+    Call Supabase RPC create_note_with_attendees.
     attendees: list of dicts with keys "name" and "hubspot_id".
     Returns the new note id.
     """
@@ -54,13 +54,13 @@ def create_note_with_attendees2(
     if not key:
         raise RuntimeError("SUPABASE_SECRET environment variable is not set")
 
-    url = f"{SUPABASE_URL}/rest/v1/rpc/create_note_with_attendees2"
+    url = f"{SUPABASE_URL}/rest/v1/rpc/create_note_with_attendees"
     payload = {
         "note_text": note_text,
         "attendees": attendees,
     }
-    if created_at is not None:
-        payload["created_at"] = created_at
+    if meeting_at is not None:
+        payload["meeting_at"] = meeting_at
 
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
