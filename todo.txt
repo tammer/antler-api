@@ -1,2 +1,4 @@
 this note comes froms a transcript that can be interogated.
+notes made need some concept of creator or owner.
+at least auto add self to new note.
 db backup

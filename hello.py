@@ -101,8 +101,8 @@ def supa_from_meetgeek():
     except Exception as e:
         return jsonify({"error": f"Failed to process meeting: {str(e)}"}), 500
     if result is None:
-        return jsonify({"message": "Meeting too short, skipped"}), 200
-    return jsonify(result)
+        return "", 200
+    return "", 200
 
 
 
