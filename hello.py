@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request
-
+import time
+import random
 from generate_ids import generate_ids
 from contact_loader import load_full, load_short
 from supa_from_id import supa_from_id as supa_from_id_func, summarize_transcript
@@ -92,6 +93,8 @@ def get_transcript_route():
 
 @app.route("/supa_from_meetgeek", methods=["POST"])
 def supa_from_meetgeek():
+    # sleep for a random number of seconds between 1 and 100 because meetgeek sends 3 requests for the same meeting
+    time.sleep(random.randint(1, 100))
     body = request.get_json(silent=True) or {}
     meeting_id = body.get("meeting_id")
     if not meeting_id:
