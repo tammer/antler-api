@@ -5,6 +5,7 @@ import summarize_prompt
 from generate_ids import generate_ids
 from supa import create_note_with_attendees
 from groq import get_groq_response
+from supa import check_id
 
 def summarize_transcript(id):
     # load system prompt for summerize_prompt.md from the same directory
@@ -25,6 +26,8 @@ def write_to_supa(note_text: str, attendees: list[dict], meeting_id: str | None 
 def supa_from_id(id):
     stats = get_stats(id)
     if stats["duration"] < 300:
+        return
+    if check_id(id):
         return
     summary = summarize_transcript(id)
     note_id = write_to_supa(summary["summary"], summary["ids"], id, stats["start_time"])
