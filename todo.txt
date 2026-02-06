@@ -1,8 +1,1 @@
-need the created_at, updated_at and meeting_at
-
 db backup
-
-fancy url shit on app /by-attendee/87234827
-
-
-
