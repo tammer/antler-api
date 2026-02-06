@@ -24,10 +24,10 @@ def write_to_supa(note_text: str, attendees: list[dict], meeting_id: str | None 
     return create_note_with_attendees(note_text, attendees, meeting_id=meeting_id, meeting_at=meeting_at)
 
 def supa_from_id(id):
+    if check_id(id):
+        return
     stats = get_stats(id)
     if stats["duration"] < 300:
-        return
-    if check_id(id):
         return
     summary = summarize_transcript(id)
     note_id = write_to_supa(summary["summary"], summary["ids"], id, stats["start_time"])
