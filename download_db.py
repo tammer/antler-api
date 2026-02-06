@@ -8,6 +8,7 @@ import os
 import urllib.request
 import urllib.error
 import json
+from datetime import datetime
 
 
 BASE_URL = "https://uhvcbstdykcvgmzqpvpd.supabase.co/rest/v1"
@@ -69,9 +70,10 @@ def fetch_table(table: str, api_key: str) -> list[dict]:
 
 def main() -> None:
     api_key = get_api_key()
+    day_mod = datetime.now().day % 5
     for table in TABLES:
         rows = fetch_table(table, api_key)
-        out_path = f"{table}.json"
+        out_path = f"{table}_{day_mod}.json"
         with open(out_path, "w") as f:
             json.dump(rows, f, indent=2)
         print(f"Wrote {len(rows)} rows to {out_path}")
