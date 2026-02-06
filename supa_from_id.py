@@ -18,14 +18,14 @@ def summarize_transcript(id):
     prepend = f"## Recording\nThis note was created from [this MeetGeek video](https://app2.meetgeek.ai/meeting/{id})\n\n"
     return {"summary": prepend + response, "ids": ids}
 
-def write_to_supa(note_text: str, attendees: list[dict], meeting_at: str | None = None) -> int:
+def write_to_supa(note_text: str, attendees: list[dict], meeting_id: str | None = None, meeting_at: str | None = None) -> int:
     """Write a note and its attendees to Supabase via create_note_with_attendees. Returns the new note id."""
-    return create_note_with_attendees(note_text, attendees, meeting_at=meeting_at)
+    return create_note_with_attendees(note_text, attendees, meeting_id=meeting_id, meeting_at=meeting_at)
 
 def supa_from_id(id):
     stats = get_stats(id)
     if stats["duration"] < 300:
         return
     summary = summarize_transcript(id)
-    note_id = write_to_supa(summary["summary"], summary["ids"], stats["start_time"])
+    note_id = write_to_supa(summary["summary"], summary["ids"], id, stats["start_time"])
     return {"note_id": note_id, "summary": summary["summary"], "ids": summary["ids"], "stats": stats}

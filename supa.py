@@ -43,6 +43,7 @@ def get_contacts_from_supabase() -> list[dict]:
 def create_note_with_attendees(
     note_text: str,
     attendees: list[dict],
+    meeting_id: str | None = None,
     meeting_at: str | None = None,
 ) -> int:
     """
@@ -58,6 +59,7 @@ def create_note_with_attendees(
     payload = {
         "note_text": note_text,
         "attendees": attendees,
+        "external_id": meeting_id,
     }
     if meeting_at is not None:
         payload["meeting_at"] = meeting_at
