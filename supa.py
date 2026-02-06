@@ -3,12 +3,43 @@ Fetch contacts from Supabase via the get_unique_hubspot_attendees RPC.
 """
 import json
 import os
+import urllib.parse
 import urllib.request
 import urllib.error
 
 
 SUPABASE_URL = "https://uhvcbstdykcvgmzqpvpd.supabase.co"
 RPC_NAME = "get_unique_hubspot_attendees"
+
+
+def check_id(id: str) -> bool:
+    """Return True if a row exists in the notes table with external_id == id, else False."""
+    key = os.environ.get("SUPABASE_SECRET")
+    if not key:
+        raise RuntimeError("SUPABASE_SECRET environment variable is not set")
+
+    # Query notes table for one row with this external_id
+    params = urllib.parse.urlencode({"external_id": f"eq.{id}", "select": "id", "limit": "1"})
+    url = f"{SUPABASE_URL}/rest/v1/notes?{params}"
+    req = urllib.request.Request(
+        url,
+        method="GET",
+        headers={
+            "Content-Type": "application/json",
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(req) as response:
+            rows = json.loads(response.read().decode())
+            return len(rows) > 0
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        raise RuntimeError(f"Supabase error {e.code}: {body}") from e
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"Request failed: {e.reason}") from e
 
 
 def get_contacts_from_supabase() -> list[dict]:

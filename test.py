@@ -1,4 +1,3 @@
-from hubspot import get_contacts_for_owner
+from supa import check_id
 
-contacts = get_contacts_for_owner("29286558")
-print(contacts[0])
+print(check_id("577074b2-a17e-4817-b9e8-bea0a82ade7"))
