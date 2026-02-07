@@ -68,7 +68,11 @@ def fetch_table(table: str, api_key: str) -> list[dict]:
     return rows
 
 
-def main() -> None:
+__all__ = ["download_db"]
+
+
+def download_db() -> None:
+    """Download Supabase tables (notes, attendees, profiles) to JSON files."""
     api_key = get_api_key()
     day_mod = datetime.now().day % 5
     for table in TABLES:
@@ -80,4 +84,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    download_db()

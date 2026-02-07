@@ -5,12 +5,10 @@ from generate_ids import generate_ids
 from contact_loader import load_full, load_short
 from supa_from_id import supa_from_id as supa_from_id_func, summarize_transcript
 from meetgeek import get_all_meetings, get_transcript
-
+from download_db import download_db as download_db_func
 app = Flask(__name__)
 
-
 ALLOWED_ORIGINS = {"http://localhost:5173", "https://api.tammer.com", "https://antler.tammer.com"}
-
 
 @app.after_request
 def cors_headers(response):
@@ -107,7 +105,10 @@ def supa_from_meetgeek():
         return "", 200
     return "", 200
 
-
+@app.route("/download_db", methods=["GET"])
+def download_db():
+    download_db_func()
+    return "", 403 # forbidden because we don't want to expose this to the world
 
 app.run(debug=True)
 
