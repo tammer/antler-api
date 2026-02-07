@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Trigger backup
         run: |
-          curl https://api.tammer.com/download_db
+          curl -f https://api.tammer.com/download_db
