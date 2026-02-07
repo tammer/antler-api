@@ -1,5 +1,0 @@
-check backups
-
-notes made need some concept of creator or owner.
-at least auto add self to new note. and self tag reply if im not there.
-
