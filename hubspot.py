@@ -16,17 +16,19 @@ PAGE_SIZE = 100
 
 def get_contacts_for_owner(
     owner_id: str,
-    created_after: str | None = None,
+    updated_after: str | None = None,
 ) -> list[dict]:
     """Fetch all contacts owned by the given HubSpot user id.
 
-    If created_after is set (e.g. '2026-01-24T00:00:00.000Z'), only contacts
-    created on or after that date are returned.
+    If updated_after is set (e.g. '2026-01-24T00:00:00.000Z'), only contacts
+    modified on or after that date are returned. This includes newly created
+    contacts and existing contacts that were updated.
     """
     all_contacts = []
     after = None
     api_key = HUBSPOT_API_KEY
 
+    # 1. Base filter: Owner ID
     filters = [
         {
             "propertyName": "hubspot_owner_id",
@@ -34,17 +36,26 @@ def get_contacts_for_owner(
             "value": owner_id,
         }
     ]
-    if created_after is not None:
+
+    # 2. Date filter: Switch to 'lastmodifieddate'
+    # 'lastmodifieddate' covers both creation (initial write) and updates.
+    if updated_after is not None:
         filters.append({
-            "propertyName": "createdate",
+            "propertyName": "lastmodifieddate",
             "operator": "GTE",
-            "value": created_after,
+            "value": updated_after,
         })
 
     while True:
         body = {
             "filterGroups": [{"filters": filters}],
             "limit": PAGE_SIZE,
+            # 3. Sort by lastmodifieddate to ensure stable pagination
+            # and to see the most recently 'touched' contacts.
+            "sorts": [{
+                "propertyName": "lastmodifieddate",
+                "direction": "ASCENDING"
+            }]
         }
         if after is not None:
             body["after"] = after
@@ -88,6 +99,7 @@ def get_contacts_for_owner(
                 ])
             ).strip() or "(no name)",
             "email": (c.get("properties", {}) or {}).get("email", "") or "",
+            "last_modified": (c.get("properties", {}) or {}).get("lastmodifieddate", ""),
         }
         for c in all_contacts
     ]

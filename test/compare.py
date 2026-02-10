@@ -7,7 +7,7 @@ import os
 
 def load_base_case():
     """Load JSON from base_case.json in the current directory."""
-    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "base_case.json")
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "orig.json")
     with open(path) as f:
         return json.load(f)
 
