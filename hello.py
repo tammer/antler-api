@@ -8,6 +8,11 @@ app = Flask(__name__)
 
 ALLOWED_ORIGINS = {"http://localhost:5173", "https://api.tammer.com", "https://antler.tammer.com"}
 
+def log(message):
+    with open("log.txt", "a") as f:
+        from datetime import datetime
+        f.write(f"{datetime.now().isoformat()} {message}\n")
+
 @app.after_request
 def cors_headers(response):
     origin = request.headers.get("Origin")
@@ -89,12 +94,17 @@ def get_transcript_route():
 
 @app.route("/supa_from_meetgeek", methods=["POST"])
 def supa_from_meetgeek():
+    log("supa_from_meetgeek")
     body = request.get_json(silent=True) or {}
+    log(f"body: {body}")
     meeting_id = body.get("meeting_id")
+    log(f"meeting_id: {meeting_id}")
     if not meeting_id:
+        log("missing meeting_id, exiting")
         return jsonify({"error": "missing meeting_id"}), 400
     try:
         result = supa_from_id_func(meeting_id)
+        log(f"result: {result}")
     except Exception as e:
         return jsonify({"error": f"Failed to process meeting: {str(e)}"}), 500
     if result is None:

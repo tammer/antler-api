@@ -1,0 +1,10 @@
+
+
+helpers
+
+curl -X POST http://127.0.0.1:5000/supa_from_meetgeek \
+     -H "Content-Type: application/json" \
+     -d '{
+           "message": "File analyzed successfully",
+           "meeting_id": "9433976b-cfa3-4373-9afb-eb0b7a5915df"
+         }'
