@@ -2,6 +2,8 @@
 
 helpers
 
+curl https://api.tammer.com/supa_from_id?meeting_id=
+
 curl -X POST http://127.0.0.1:5000/supa_from_meetgeek \
      -H "Content-Type: application/json" \
      -d '{
