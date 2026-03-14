@@ -107,7 +107,7 @@ def get_notes_for_attendee(hubspot_id: str) -> list[dict]:
 
     note_params = urllib.parse.urlencode({
         "id": f"in.({','.join(str(note_id) for note_id in note_ids)})",
-        "select": "id,note,meeting_at,external_id",
+        "select": "note,meeting_at,external_id",
         "order": "meeting_at.asc",
     })
     note_url = f"{SUPABASE_URL}/rest/v1/notes?{note_params}"

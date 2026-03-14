@@ -72,15 +72,17 @@ def all_notes_in_supa():
         response = []
         for note in notes:
             external_id = note.get("external_id")
+            note_type = "note"
             text = note.get("note") or ""
             if external_id:
+                note_type = "meeting transcript"
                 transcript = get_transcript(external_id)
                 text = transcript.get("transcript", "")
 
             response.append({
-                "note_id": note.get("id"),
                 "meeting_at": note.get("meeting_at"),
                 "external_id": external_id,
+                "type": note_type,
                 "text": text,
             })
     except Exception as e:
