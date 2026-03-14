@@ -71,6 +71,66 @@ def get_contacts_from_supabase() -> list[dict]:
         raise RuntimeError(f"Request failed: {e.reason}") from e
 
 
+def get_notes_for_attendee(hubspot_id: str) -> list[dict]:
+    """Return notes linked to an attendee hubspot_id, ordered by meeting_at."""
+    key = os.environ.get("SUPABASE_SECRET")
+    if not key:
+        raise RuntimeError("SUPABASE_SECRET environment variable is not set")
+
+    attendee_params = urllib.parse.urlencode({
+        "hubspot_id": f"eq.{hubspot_id}",
+        "select": "note_id",
+    })
+    attendee_url = f"{SUPABASE_URL}/rest/v1/attendees?{attendee_params}"
+    attendee_req = urllib.request.Request(
+        attendee_url,
+        method="GET",
+        headers={
+            "Content-Type": "application/json",
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(attendee_req) as response:
+            attendee_rows = json.loads(response.read().decode())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        raise RuntimeError(f"Supabase error {e.code}: {body}") from e
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"Request failed: {e.reason}") from e
+
+    note_ids = sorted({row["note_id"] for row in attendee_rows if row.get("note_id") is not None})
+    if not note_ids:
+        return []
+
+    note_params = urllib.parse.urlencode({
+        "id": f"in.({','.join(str(note_id) for note_id in note_ids)})",
+        "select": "id,note,meeting_at,external_id",
+        "order": "meeting_at.asc",
+    })
+    note_url = f"{SUPABASE_URL}/rest/v1/notes?{note_params}"
+    note_req = urllib.request.Request(
+        note_url,
+        method="GET",
+        headers={
+            "Content-Type": "application/json",
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+        },
+    )
+
+    try:
+        with urllib.request.urlopen(note_req) as response:
+            return json.loads(response.read().decode())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()
+        raise RuntimeError(f"Supabase error {e.code}: {body}") from e
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"Request failed: {e.reason}") from e
+
+
 def create_note_with_attendees(
     note_text: str,
     attendees: list[dict],

@@ -3,6 +3,7 @@ from generate_ids import generate_ids
 from contact_loader import load_full, load_short
 from supa_from_id import supa_from_id as supa_from_id_func, summarize_transcript
 from meetgeek import get_all_meetings, get_transcript
+from supa import get_notes_for_attendee
 from download_db import download_db as download_db_func
 app = Flask(__name__)
 
@@ -58,6 +59,34 @@ def summary_from_id():
     except Exception as e:
         return jsonify({"error": f"Failed to generate summary: {str(e)}"}), 500
     return jsonify(result)
+
+
+@app.route("/all_notes_in_supa", methods=["GET"])
+def all_notes_in_supa():
+    attendee_id = request.args.get("attendee_id")
+    if not attendee_id:
+        return jsonify({"error": "missing attendee_id"}), 400
+
+    try:
+        notes = get_notes_for_attendee(attendee_id)
+        response = []
+        for note in notes:
+            external_id = note.get("external_id")
+            text = note.get("note") or ""
+            if external_id:
+                transcript = get_transcript(external_id)
+                text = transcript.get("transcript", "")
+
+            response.append({
+                "note_id": note.get("id"),
+                "meeting_at": note.get("meeting_at"),
+                "external_id": external_id,
+                "text": text,
+            })
+    except Exception as e:
+        return jsonify({"error": f"Failed to fetch notes: {str(e)}"}), 500
+
+    return jsonify(response)
 
 
 @app.route("/get_all_meetings", methods=["GET"])
